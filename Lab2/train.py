@@ -70,7 +70,7 @@ def get_loss_fn():
     
     return _loss
 
-# Аугментации и трансформы
+
 train_transform = A.Compose([
     A.Resize(320, 320),
     A.HorizontalFlip(p=0.5),
