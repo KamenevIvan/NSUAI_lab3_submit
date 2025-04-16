@@ -37,7 +37,7 @@ CONFIG = {
     "checkpoint_path": "best_model.pth",
 }
 
-# Выбор модели
+
 def get_model():
     model_class = getattr(smp, CONFIG["model_name"])
     return model_class(
