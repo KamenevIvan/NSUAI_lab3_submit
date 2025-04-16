@@ -70,7 +70,7 @@ def get_loss_fn():
     
     return _loss
 
-# 🔧 Аугментации и трансформы
+# Аугментации и трансформы
 train_transform = A.Compose([
     A.Resize(320, 320),
     A.HorizontalFlip(p=0.5),
@@ -155,7 +155,7 @@ def evaluate(model, loader):
             iou = (intersection / (union + 1e-6)).mean().item()
             total_iou += iou
 
-            # #  Визуализация
+            # 
             # if not plotted:
             #     for i in range(min(2, images.size(0))):  
             #         plt.figure(figsize=(12,4))
