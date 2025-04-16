@@ -18,7 +18,7 @@ from dataset import RoadSegDataset
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(DEVICE)
 
-#  Конфигурация
+
 CONFIG = {
     "model_name": "Unet",  # "Unet", "FPN", "DeepLabV3"
     "encoder_name": "resnet50",  # "efficientnet-b0", "mobilenet_v2"
