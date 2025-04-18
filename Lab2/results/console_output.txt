@@ -1,0 +1,7 @@
+Evaluating final model on validation set...
+Final Metrics:
+IoU: 0.5193
+Dice: 0.6766
+Pixel Accuracy: 0.9551
+Precision: 0.6659
+Recall: 0.6928

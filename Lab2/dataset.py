@@ -28,11 +28,11 @@ class RoadSegDataset(Dataset):
 
         mask_path = os.path.join(self.mask_dir, mask_name)
 
-        # Read image and mask
+
         image = np.array(Image.open(img_path).convert("RGB"))
         mask = np.array(Image.open(mask_path).convert("L"), dtype=np.uint8)
 
-        # Augmentations
+
         if self.transform:
             augmented = self.transform(image=image, mask=mask)
             image = augmented['image']              

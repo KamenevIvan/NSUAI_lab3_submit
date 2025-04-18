@@ -1,0 +1,6 @@
+__pycache__
+/tiff
+best_model.pth
+label_class_dict.csv
+metadata.csv
+*.rar

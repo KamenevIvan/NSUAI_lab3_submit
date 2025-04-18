@@ -14,7 +14,10 @@ import csv
 import segmentation_models_pytorch as smp
 from dataset import RoadSegDataset 
 
+import time
 
+
+history = []
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(DEVICE)
 
@@ -29,7 +32,7 @@ CONFIG = {
     "loss_name": "bce+dice",  # "bce", "dice", "bce+dice"
     "lr": 3e-4,
     "batch_size": 16,
-    "num_epochs": 40,           #ПОПРОБОВАТЬ
+    "num_epochs": 50,          
     "img_dir": "tiff/train",
     "mask_dir": "tiff/train_labels",
     "val_img_dir": "tiff/val",
@@ -72,7 +75,7 @@ def get_loss_fn():
 
 
 train_transform = A.Compose([
-    A.Resize(320, 320),
+    A.Resize(512, 512),  #ПОПРОБОВАТЬ
     A.HorizontalFlip(p=0.5),
     A.VerticalFlip(p=0.2),
     A.RandomBrightnessContrast(p=0.2),
@@ -82,10 +85,73 @@ train_transform = A.Compose([
 ])
 
 val_transform = A.Compose([
-    A.Resize(320, 320),
+    A.Resize(512, 512),
     A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
     ToTensorV2()
 ])
+
+def compute_val_loss(model, loader, loss_fn):
+    model.eval()
+    total_loss = 0.0
+    with torch.no_grad():
+        for images, masks in loader:
+            images = images.to(DEVICE)
+            masks = masks.to(DEVICE).float()
+            preds = model(images)
+            loss = loss_fn(preds, masks)
+            total_loss += loss.item()
+    return total_loss / len(loader)
+
+def save_training_history(history, filename="training_history.csv"):
+    if not history:
+        return
+    keys = history[0].keys()
+    with open(filename, mode="w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=keys)
+        writer.writeheader()
+        writer.writerows(history)
+
+def compute_final_metrics(model, loader):
+    model.eval()
+    total_inter = 0
+    total_union = 0
+    total_dice = 0
+    total_pixel_acc = 0
+    total_precision = 0
+    total_recall = 0
+    n = 0
+
+    with torch.no_grad():
+        for images, masks in loader:
+            images = images.to(DEVICE)
+            masks = masks.to(DEVICE).float()
+
+            preds = model(images)
+            preds = torch.sigmoid(preds)
+            preds = (preds > 0.5).float()
+
+            inter = (preds * masks).sum((1,2,3))
+            union = ((preds + masks) > 0).float().sum((1,2,3))
+            dice = (2 * inter / (preds.sum((1,2,3)) + masks.sum((1,2,3)) + 1e-6))
+            acc = (preds == masks).float().mean((1,2,3))
+            precision = (inter / (preds.sum((1,2,3)) + 1e-6))
+            recall = (inter / (masks.sum((1,2,3)) + 1e-6))
+
+            total_inter += inter.sum().item()
+            total_union += union.sum().item()
+            total_dice += dice.sum().item()
+            total_pixel_acc += acc.sum().item()
+            total_precision += precision.sum().item()
+            total_recall += recall.sum().item()
+            n += images.size(0)
+
+    return {
+        "IoU": total_inter / (total_union + 1e-6),
+        "Dice": total_dice / n,
+        "Pixel Accuracy": total_pixel_acc / n,
+        "Precision": total_precision / n,
+        "Recall": total_recall / n
+    }
 
 
 def test_dataloader():
@@ -111,6 +177,7 @@ def train():
 
     best_iou = 0.0
     for epoch in range(CONFIG["num_epochs"]):
+        start_time = time.time()
         model.train()
         total_loss = 0
 
@@ -129,6 +196,19 @@ def train():
         avg_loss = total_loss / len(train_loader)
         iou_score = evaluate(model, val_loader)
 
+        val_loss = compute_val_loss(model, val_loader, loss_fn)
+        epoch_time = time.time() - start_time
+
+        print(f"Epoch {epoch+1}/{CONFIG['num_epochs']}, Train Loss: {avg_loss:.4f}, Val Loss: {val_loss:.4f}, Val IoU: {iou_score:.4f}, Time: {epoch_time:.2f} sec")
+
+        history.append({
+            "epoch": epoch + 1,
+            "train_loss": avg_loss,
+            "val_loss": val_loss,
+            "val_iou": iou_score,
+            "time": round(epoch_time, 2)
+        })
+
         print(f"Loss: {avg_loss:.4f} | Val IoU: {iou_score:.4f}")
 
         # Save 
@@ -136,6 +216,14 @@ def train():
             best_iou = iou_score
             torch.save(model.state_dict(), CONFIG["checkpoint_path"])
             log_results(CONFIG, best_iou)
+    
+    save_training_history(history)
+    print("\nEvaluating final model on validation set...")
+    metrics = compute_final_metrics(model, val_loader)
+    print("Final Metrics:")
+    for k, v in metrics.items():
+        print(f"{k}: {v:.4f}")
+
 
 def evaluate(model, loader):
     model.eval()
