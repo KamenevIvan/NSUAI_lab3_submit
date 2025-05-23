@@ -19,4 +19,4 @@ Per-class Recall: [0.972 0.977 0.918 0.919 0.923 0.918 0.948 0.949 0.893 0.93 ]
 Per-class Accuracy: [0.972 0.977 0.918 0.919 0.923 0.918 0.948 0.949 0.893 0.93 ]
 Per-class F1: [0.966 0.965 0.927 0.91  0.934 0.92  0.95  0.943 0.911 0.922]
 
-![Иллюстрация 1](https://github.com/KamenevIvan/AIcourse/blob/main/Lab3/forREADME/results.png)
+![Иллюстрация 1](https://github.com/KamenevIvan/AIcourse/blob/main/Lab4/forReadme/e1.png)
