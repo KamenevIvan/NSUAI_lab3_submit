@@ -28,6 +28,7 @@ def compute_metrics(y_true, y_pred, num_classes=10):
     precision = np.zeros(num_classes)
     recall = np.zeros(num_classes)
     class_accuracy = np.zeros(num_classes)
+    f1 = np.zeros(num_classes)
 
     for c in range(num_classes):
         TP = np.sum((y_pred == c) & (y_true == c))
@@ -39,7 +40,12 @@ def compute_metrics(y_true, y_pred, num_classes=10):
         recall[c] = TP / (TP + FN) if (TP + FN) > 0 else 0.0
         class_accuracy[c] = TP / total if total > 0 else 0.0
 
-    return precision, recall, class_accuracy
+        if precision[c] + recall[c] > 0:
+            f1[c] = 2 * precision[c] * recall[c] / (precision[c] + recall[c])
+        else:
+            f1[c] = 0.0
+
+    return precision, recall, class_accuracy, f1
 
 
 def load_mnist_split():
@@ -119,18 +125,14 @@ def train():
     test_preds = np.argmax(test_logits, axis=1)
     test_acc = np.mean(test_preds == y_test)
 
-    precision, recall, class_acc = compute_metrics(y_test, test_preds)
+    precision, recall, class_acc, f1 = compute_metrics(y_test, test_preds)
 
     print(f"\nTest Accuracy: {test_acc:.4f}")
 
-    print("\nPer-class Precision:")
-    print(np.round(precision, 3))
-
-    print("\nPer-class Recall:")
-    print(np.round(recall, 3))
-
-    print("\nPer-class Accuracy:")
-    print(np.round(class_acc, 3))
+    print("\nPer-class Precision:", np.round(precision, 3))
+    print("Per-class Recall:", np.round(recall, 3))
+    print("Per-class Accuracy:", np.round(class_acc, 3))
+    print("Per-class F1:", np.round(f1, 3))
 
     show_predictions(X_test, y_test, test_preds, num_images=10)
 
