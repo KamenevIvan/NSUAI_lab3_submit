@@ -15,7 +15,7 @@ class MLP:
         self.fc3 = Linear(hidden_dims[1], output_dim)
         self.layers = [self.fc1, self.bn1, self.relu1,
                        self.fc2, self.bn2, self.relu2,
-                       self.fc3]  # fc3 – logits
+                       self.fc3] 
 
     def forward(self, x, training=True):
         for layer in self.layers:
@@ -28,7 +28,7 @@ class MLP:
     def backward(self, dout):
         for layer in reversed(self.layers):
             dout = layer.backward(dout)
-        return dout  # градиент по входу (x)
+        return dout 
 
     def step(self, lr):
         for layer in self.layers:

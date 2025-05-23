@@ -11,8 +11,7 @@ class ReLU:
     def backward(self, dout):
         return dout * self.mask
     
-
-#Test run
+''''
 
 x = np.array([
     [1.0, -0.5, 0.0],
@@ -30,3 +29,4 @@ dx = relu.backward(dout)
 
 print("Grad from next layer:\n", dout)
 print("Backward grad through ReLU:\n", dx)
+'''

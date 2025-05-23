@@ -6,20 +6,16 @@ class BatchNorm1d:
         self.momentum = momentum
         self.eps = eps
 
-        # Параметры, обучаются
         self.gamma = np.ones((num_features,))
         self.beta = np.zeros((num_features,))
 
-        # Буферы
         self.running_mean = np.zeros((num_features,))
         self.running_var = np.ones((num_features,))
 
-        # Кэш для backward
         self.x_hat = None
         self.std_inv = None
         self.x_mu = None
 
-        # Градиенты
         self.dgamma = np.zeros_like(self.gamma)
         self.dbeta = np.zeros_like(self.beta)
 
@@ -34,7 +30,7 @@ class BatchNorm1d:
 
             out = self.gamma * self.x_hat + self.beta
 
-            # Обновим бегущее среднее и дисперсию
+
             self.running_mean = (
                 self.momentum * self.running_mean + (1 - self.momentum) * batch_mean
             )
@@ -42,7 +38,7 @@ class BatchNorm1d:
                 self.momentum * self.running_var + (1 - self.momentum) * batch_var
             )
         else:
-            # Инференс
+            
             x_hat = (x - self.running_mean) / np.sqrt(self.running_var + self.eps)
             out = self.gamma * x_hat + self.beta
 
@@ -73,7 +69,7 @@ class BatchNorm1d:
 
 
 #Test
-
+'''
 np.random.seed(0)
 x = np.random.randn(4, 3) * 5 + 10
 bn = BatchNorm1d(3)
@@ -84,3 +80,4 @@ print("Normalized output:\n", out)
 dout = np.random.randn(4, 3)
 dx = bn.backward(dout)
 print("dx:\n", dx)
+'''

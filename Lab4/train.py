@@ -47,20 +47,19 @@ def load_mnist_split():
     mnist = fetch_openml('mnist_784', version=1, as_frame=False)
     X, y = mnist['data'], mnist['target'].astype(int)
 
-    X = X / 255.0  # нормализация к [0,1]
+    X = X / 255.0 
 
-    # Разделим: сначала train_val и test
     X_train_val, X_test, y_train_val, y_test = train_test_split(
         X, y, test_size=10000, random_state=42
     )
-    # Теперь train и val из train_val
+
     X_train, X_val, y_train, y_val = train_test_split(
         X_train_val, y_train_val, test_size=10000, random_state=42
     )
 
     return X_train, X_val, X_test, y_train, y_val, y_test
 
-# 2. Батч итератор
+
 def batch_iter(X, y, batch_size=64, shuffle=True):
     n_samples = X.shape[0]
     indices = np.arange(n_samples)
@@ -71,9 +70,9 @@ def batch_iter(X, y, batch_size=64, shuffle=True):
         batch_idx = indices[start_idx:start_idx + batch_size]
         yield X[batch_idx], y[batch_idx]
 
-# 3. Обучение
+
 def train():
-    # Гиперпараметры
+    
     input_dim = 784
     hidden_dims = [128, 64]
     output_dim = 10
@@ -81,11 +80,9 @@ def train():
     epochs = 10
     batch_size = 64
 
-    # Инициализация модели и лосса
     model = MLP(input_dim, hidden_dims, output_dim)
     loss_fn = SoftmaxCrossEntropyLoss()
 
-    # Загрузка данных
     X_train, X_val, X_test, y_train, y_val, y_test = load_mnist_split()
 
     for epoch in range(1, epochs + 1):
@@ -94,7 +91,6 @@ def train():
         train_acc = 0
         n_train = 0
 
-        # Тренировочный цикл
         for X_batch, y_batch in batch_iter(X_train, y_train, batch_size):
             logits = model.forward(X_batch, training=True)
             loss = loss_fn.forward(logits, y_batch)
@@ -111,7 +107,6 @@ def train():
         train_loss /= n_train
         train_acc /= n_train
 
-        # Валидация
         model.train_mode = False
         val_logits = model.forward(X_val, training=False)
         val_preds = np.argmax(val_logits, axis=1)
