@@ -45,10 +45,6 @@ class BatchNorm1d:
         return out
 
     def backward(self, dout):
-        """
-        dout: (batch_size, num_features)
-        returns: dx: (batch_size, num_features)
-        """
         N, D = dout.shape
 
         self.dbeta = np.sum(dout, axis=0)
