@@ -83,42 +83,52 @@ def train():
     hidden_dims = [128, 64]
     output_dim = 10
     lr = 0.1
-    epochs = 10
+    epochs = 40
     batch_size = 64
+
+    loadW = True
+    weightsPath = "model_weights.pkl"
 
     model = MLP(input_dim, hidden_dims, output_dim)
     loss_fn = SoftmaxCrossEntropyLoss()
 
     X_train, X_val, X_test, y_train, y_val, y_test = load_mnist_split()
+    if not loadW:
+        for epoch in range(1, epochs + 1):
+            model.train_mode = True
+            train_loss = 0
+            train_acc = 0
+            n_train = 0
 
-    for epoch in range(1, epochs + 1):
-        model.train_mode = True
-        train_loss = 0
-        train_acc = 0
-        n_train = 0
+            for X_batch, y_batch in batch_iter(X_train, y_train, batch_size):
+                logits = model.forward(X_batch, training=True)
+                loss = loss_fn.forward(logits, y_batch)
+                dlogits = loss_fn.backward()
 
-        for X_batch, y_batch in batch_iter(X_train, y_train, batch_size):
-            logits = model.forward(X_batch, training=True)
-            loss = loss_fn.forward(logits, y_batch)
-            dlogits = loss_fn.backward()
+                model.backward(dlogits)
+                model.step(lr)
 
-            model.backward(dlogits)
-            model.step(lr)
+                train_loss += loss * X_batch.shape[0]
+                preds = np.argmax(logits, axis=1)
+                train_acc += np.sum(preds == y_batch)
+                n_train += X_batch.shape[0]
 
-            train_loss += loss * X_batch.shape[0]
-            preds = np.argmax(logits, axis=1)
-            train_acc += np.sum(preds == y_batch)
-            n_train += X_batch.shape[0]
+            train_loss /= n_train
+            train_acc /= n_train
 
-        train_loss /= n_train
-        train_acc /= n_train
+            model.train_mode = False
+            val_logits = model.forward(X_val, training=False)
+            val_preds = np.argmax(val_logits, axis=1)
+            val_acc = np.mean(val_preds == y_val)
 
-        model.train_mode = False
-        val_logits = model.forward(X_val, training=False)
-        val_preds = np.argmax(val_logits, axis=1)
-        val_acc = np.mean(val_preds == y_val)
-
-        print(f"Epoch {epoch}: Train Loss={train_loss:.4f}, Train Acc={train_acc:.4f}, Val Acc={val_acc:.4f}")
+            print(f"Epoch {epoch}: Train Loss={train_loss:.4f}, Train Acc={train_acc:.4f}, Val Acc={val_acc:.4f}")
+        
+        model.save_weights(weightsPath)
+        print("Model weights saved to model_weights.pkl")
+    
+    if loadW:
+        model.load_weights(weightsPath)
+        print("Weights loaded.")
 
     model.train_mode = False
     test_logits = model.forward(X_test, training=False)
