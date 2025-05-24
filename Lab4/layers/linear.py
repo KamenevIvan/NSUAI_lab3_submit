@@ -12,18 +12,10 @@ class Linear:
         self.db = np.zeros_like(self.b)
 
     def forward(self, x):
-        """
-        x: (batch_size, in_features)
-        returns: (batch_size, out_features)
-        """
         self.x = x
         return x @ self.W.T + self.b
 
     def backward(self, dout):
-        """
-        dout: градиенты от следующего слоя, shape (batch_size, out_features)
-        Возвращает градиенты по входу: (batch_size, in_features)
-        """
         batch_size = dout.shape[0]
 
         self.dW = (dout.T @ self.x) / batch_size
