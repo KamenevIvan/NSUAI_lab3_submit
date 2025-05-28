@@ -21,3 +21,13 @@ Input   ->  FC1 ->  BN1 ->  ReLU    ->  FC2 ->  BN2 ->  ReLU    ->  FC3 ->  Soft
 
 ![Иллюстрация 1](https://github.com/KamenevIvan/AIcourse/blob/main/Lab4/forReadme/e1.png)
 
+Обучение на 40 эпохах:
+
+- Test Accuracy: 0.9620
+
+- Per-class Precision: [0.976 0.98  0.943 0.957 0.959 0.964 0.969 0.959 0.958 0.953]
+- Per-class Recall: [0.98  0.985 0.964 0.948 0.96  0.952 0.975 0.965 0.935 0.953]
+- Per-class Accuracy: [0.98  0.985 0.964 0.948 0.96  0.952 0.975 0.965 0.935 0.953]
+- Per-class F1: [0.978 0.983 0.953 0.952 0.96  0.958 0.972 0.962 0.946 0.953]
+
+![Иллюстрация 1](https://github.com/KamenevIvan/AIcourse/blob/main/Lab4/forReadme/e2.png)
