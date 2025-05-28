@@ -25,17 +25,3 @@ class SoftmaxCrossEntropyLoss:
         grad[np.arange(batch_size), self.labels] -= 1
         grad /= batch_size
         return grad
-
-#Test
-'''
-np.random.seed(0)
-logits = np.random.randn(4, 3)
-labels = np.array([0, 2, 1, 1])
-
-loss_fn = SoftmaxCrossEntropyLoss()
-loss = loss_fn.forward(logits, labels)
-grad = loss_fn.backward()
-
-print("Loss:", loss)
-print("Gradient:\n", grad)
-'''

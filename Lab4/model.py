@@ -1,6 +1,7 @@
 from layers.batchnorm import BatchNorm1d
 from layers.linear import Linear
 from layers.relu import ReLU
+from layers.tensor import Tensor
 
 import pickle
 
@@ -23,11 +24,12 @@ class MLP:
         ]
 
     def forward(self, x, training=True):
-        for layer in self.layers:
-            if isinstance(layer, BatchNorm1d):
-                x = layer.forward(x, training)
-            else:
-                x = layer.forward(x)
+        if not isinstance(x, Tensor):
+            x = Tensor(x)
+        #print(f"Вход модели: {x.data.shape}")
+        for i, layer in enumerate(self.layers):
+            x = layer.forward(x, training=training)
+            #print(f"После слоя {type(layer).__name__} ({i+1}): {x.data.shape}")
         return x
 
     def backward(self, dout):
@@ -35,10 +37,12 @@ class MLP:
             dout = layer.backward(dout)
         return dout
 
-    def step(self, lr):
+    def parameters(self):
+        params = []
         for layer in self.layers:
-            if hasattr(layer, "step"):
-                layer.step(lr)
+            if hasattr(layer, "parameters"):
+                params.extend(layer.parameters())
+        return params
 
     def save_weights(self, filepath):
         weights = []

@@ -20,3 +20,4 @@ Input   ->  FC1 ->  BN1 ->  ReLU    ->  FC2 ->  BN2 ->  ReLU    ->  FC3 ->  Soft
 - Per-class F1: [0.966 0.965 0.927 0.91  0.934 0.92  0.95  0.943 0.911 0.922]
 
 ![Иллюстрация 1](https://github.com/KamenevIvan/AIcourse/blob/main/Lab4/forReadme/e1.png)
+

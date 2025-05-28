@@ -1,8 +1,10 @@
+import csv
 import numpy as np
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 
 from model import MLP
+from layers.optim import SGD
 from activations.softmax_crossentropy import SoftmaxCrossEntropyLoss
 
 import matplotlib.pyplot as plt
@@ -86,53 +88,62 @@ def train():
     epochs = 40
     batch_size = 64
 
-    loadW = True
+    loadW = False
     weightsPath = "model_weights.pkl"
 
     model = MLP(input_dim, hidden_dims, output_dim)
     loss_fn = SoftmaxCrossEntropyLoss()
+    optimizer = SGD(model.parameters(), lr=lr)
 
     X_train, X_val, X_test, y_train, y_val, y_test = load_mnist_split()
     if not loadW:
-        for epoch in range(1, epochs + 1):
-            model.train_mode = True
-            train_loss = 0
-            train_acc = 0
-            n_train = 0
+        with open('metrics.csv', mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['epoch', 'train_loss', 'train_acc', 'val_acc'])
+            for epoch in range(1, epochs + 1):
+                model.train_mode = True
+                train_loss = 0
+                train_acc = 0
+                n_train = 0
 
-            for X_batch, y_batch in batch_iter(X_train, y_train, batch_size):
-                logits = model.forward(X_batch, training=True)
-                loss = loss_fn.forward(logits, y_batch)
-                dlogits = loss_fn.backward()
+                for X_batch, y_batch in batch_iter(X_train, y_train, batch_size):
+                    
+                    #print(f"Форма X_batch: {X_batch.shape}, Тип: {type(X_batch)}")
+                    optimizer.zero_grad()
+                    logits = model.forward(X_batch, training=True)
+                    #print(f"Форма logits.data: {logits.data.shape}, Тип: {type(logits)}")
+                    loss = loss_fn.forward(logits.data, y_batch)
+                    dlogits = loss_fn.backward()
 
-                model.backward(dlogits)
-                model.step(lr)
+                    model.backward(dlogits)
+                    optimizer.step()    
 
-                train_loss += loss * X_batch.shape[0]
-                preds = np.argmax(logits, axis=1)
-                train_acc += np.sum(preds == y_batch)
-                n_train += X_batch.shape[0]
+                    train_loss += loss * X_batch.shape[0]
+                    preds = np.argmax(logits.data, axis=1)
+                    train_acc += np.sum(preds == y_batch)
+                    n_train += X_batch.shape[0]
 
-            train_loss /= n_train
-            train_acc /= n_train
+                train_loss /= n_train
+                train_acc /= n_train
 
-            model.train_mode = False
-            val_logits = model.forward(X_val, training=False)
-            val_preds = np.argmax(val_logits, axis=1)
-            val_acc = np.mean(val_preds == y_val)
+                model.train_mode = False
+                val_logits = model.forward(X_val, training=False)
+                val_preds = np.argmax(val_logits.data, axis=1)
+                val_acc = np.mean(val_preds == y_val)
 
-            print(f"Epoch {epoch}: Train Loss={train_loss:.4f}, Train Acc={train_acc:.4f}, Val Acc={val_acc:.4f}")
-        
-        model.save_weights(weightsPath)
-        print("Model weights saved to model_weights.pkl")
+                writer.writerow([epoch, train_loss, train_acc, val_acc])
+                print(f"Epoch {epoch}: Train Loss={train_loss:.4f}, Train Acc={train_acc:.4f}, Val Acc={val_acc:.4f}")
+            
+            model.save_weights(weightsPath)
+            print("Model weights saved to model_weights.pkl")
     
-    if loadW:
+    if loadW:   
         model.load_weights(weightsPath)
         print("Weights loaded.")
 
     model.train_mode = False
     test_logits = model.forward(X_test, training=False)
-    test_preds = np.argmax(test_logits, axis=1)
+    test_preds = np.argmax(test_logits.data, axis=1)
     test_acc = np.mean(test_preds == y_test)
 
     precision, recall, class_acc, f1 = compute_metrics(y_test, test_preds)
