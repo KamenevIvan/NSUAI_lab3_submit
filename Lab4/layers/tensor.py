@@ -14,8 +14,8 @@ class Tensor:
         self.creator = creator 
         self._backward = lambda: None  
 
-    def set_creator(self, creator):
-        self.creator = creator
+    def set_creator(self, op):
+        self.creator = op
 
     def backward(self, grad=None):
         if not self.requires_grad:
@@ -25,13 +25,13 @@ class Tensor:
             grad = np.ones_like(self.data)
 
         self.grad += grad
-
         self._backward()
 
         if self.creator is not None:
-            for inp in self.creator.inputs:
+            grads = self.creator.backward(grad) 
+            for i, inp in enumerate(self.creator.inputs):
                 if inp.requires_grad:
-                    inp.backward(inp.creator.output_grads[inp])
+                    inp.backward(grads[i])  
 
     def __repr__(self):
         return f"Tensor(data={self.data}, grad={self.grad})"

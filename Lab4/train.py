@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 from model import MLP
 from layers.optim import SGD
-from activations.softmax_crossentropy import SoftmaxCrossEntropyLoss
+from softmax_crossentropy import softmax_crossentropy
 
 import matplotlib.pyplot as plt
 
@@ -92,7 +92,6 @@ def train():
     weightsPath = "model_weights.pkl"
 
     model = MLP(input_dim, hidden_dims, output_dim)
-    loss_fn = SoftmaxCrossEntropyLoss()
     optimizer = SGD(model.parameters(), lr=lr)
 
     X_train, X_val, X_test, y_train, y_val, y_test = load_mnist_split()
@@ -112,13 +111,12 @@ def train():
                     optimizer.zero_grad()
                     logits = model.forward(X_batch, training=True)
                     #print(f"Форма logits.data: {logits.data.shape}, Тип: {type(logits)}")
-                    loss = loss_fn.forward(logits.data, y_batch)
-                    dlogits = loss_fn.backward()
 
-                    model.backward(dlogits)
+                    loss = softmax_crossentropy(logits, y_batch)
+                    loss.backward()
                     optimizer.step()    
 
-                    train_loss += loss * X_batch.shape[0]
+                    train_loss += loss.data * X_batch.shape[0]
                     preds = np.argmax(logits.data, axis=1)
                     train_acc += np.sum(preds == y_batch)
                     n_train += X_batch.shape[0]

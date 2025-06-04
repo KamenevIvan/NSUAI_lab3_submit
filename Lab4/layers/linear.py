@@ -8,31 +8,24 @@ class Linear:
         b = np.zeros((out_features,))
         self.W = Param(W)
         self.b = Param(b)
-        self.x = None
 
     def forward(self, x, training=True): 
-        self.x = x.data if isinstance(x, Tensor) else x
-        out_data = self.x @ self.W.value.T + self.b.value
+        out_data = x.data @ self.W.value.T + self.b.value
         out = Tensor(out_data, requires_grad=True)
         out.set_creator(self)
-        
-        def _backward():
-            batch_size = out.grad.shape[0]
-            self.W.grad = (out.grad.T @ self.x) / batch_size
-            self.b.grad = np.mean(out.grad, axis=0)
-            dx = out.grad @ self.W.value
-            if isinstance(x, Tensor) and x.requires_grad:
-                x.backward(dx)
-        
-        out._backward = _backward
+        self.inputs = [x]
+        self.x = x 
         return out
-    
+
     def backward(self, dout):
+        x = self.x
         batch_size = dout.shape[0]
-        self.W.grad = (dout.T @ self.x) / batch_size
+
+        self.W.grad = (dout.T @ x.data) / batch_size
         self.b.grad = np.mean(dout, axis=0)
+
         dx = dout @ self.W.value
-        return dx
+        return [dx]  
 
     def parameters(self):
         return [self.W, self.b]
