@@ -88,7 +88,7 @@ def train():
     epochs = 20
     batch_size = 64
 
-    loadW = True
+    loadW = False
     weightsPath = "model_weights.pkl"
 
     model = MLP(input_dim, hidden_dims, output_dim)

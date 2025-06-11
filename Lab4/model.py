@@ -2,6 +2,7 @@ from layers.batchnorm import BatchNorm1d
 from layers.linear import Linear
 from layers.relu import ReLU
 from layers.tensor import Tensor
+from layers.dummy import DummyMax
 
 import pickle
 
@@ -17,10 +18,12 @@ class MLP:
 
         self.fc3 = Linear(hidden_dims[1], output_dim)
 
+        self.dummy = DummyMax()
+
         self.layers = [
             self.fc1, self.bn1, self.relu1,
             self.fc2, self.bn2, self.relu2,
-            self.fc3
+            self.fc3, self.dummy
         ]
 
     def forward(self, x, training=True):
