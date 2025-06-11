@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 
-from model import MLP
+from model import MLP, save_weights, load_weights
 from layers.optim import SGD
 from softmax_crossentropy import softmax_crossentropy
 
@@ -85,10 +85,10 @@ def train():
     hidden_dims = [128, 64]
     output_dim = 10
     lr = 0.1
-    epochs = 40
+    epochs = 20
     batch_size = 64
 
-    loadW = False
+    loadW = True
     weightsPath = "model_weights.pkl"
 
     model = MLP(input_dim, hidden_dims, output_dim)
@@ -132,11 +132,11 @@ def train():
                 writer.writerow([epoch, train_loss, train_acc, val_acc])
                 print(f"Epoch {epoch}: Train Loss={train_loss:.4f}, Train Acc={train_acc:.4f}, Val Acc={val_acc:.4f}")
             
-            model.save_weights(weightsPath)
+            save_weights(model, weightsPath)
             print("Model weights saved to model_weights.pkl")
     
     if loadW:   
-        model.load_weights(weightsPath)
+        load_weights(model, weightsPath)
         print("Weights loaded.")
 
     model.train_mode = False

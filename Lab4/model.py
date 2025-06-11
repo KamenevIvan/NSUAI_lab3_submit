@@ -32,10 +32,10 @@ class MLP:
             #print(f"После слоя {type(layer).__name__} ({i+1}): {x.data.shape}")
         return x
 
-    def backward(self, dout):
-        for layer in reversed(self.layers):
-            dout = layer.backward(dout)
-        return dout
+    # def backward(self, dout):
+    #     for layer in reversed(self.layers):
+    #         dout = layer.backward(dout)
+    #     return dout
 
     def parameters(self):
         params = []
@@ -43,8 +43,9 @@ class MLP:
             if hasattr(layer, "parameters"):
                 params.extend(layer.parameters())
         return params
+    
 
-    def save_weights(self, filepath):
+    def state_dict(self):
         weights = []
         for layer in self.layers:
             params = {}
@@ -52,12 +53,19 @@ class MLP:
                 if hasattr(layer, attr):
                     params[attr] = getattr(layer, attr)
             weights.append(params)
-        with open(filepath, 'wb') as f:
-            pickle.dump(weights, f)
+        return weights
 
-    def load_weights(self, filepath):
-        with open(filepath, 'rb') as f:
-            weights = pickle.load(f)
-        for layer, params in zip(self.layers, weights):
+    def load_state_dict(self, state_dict):
+        for layer, params in zip(self.layers, state_dict):
             for key, value in params.items():
                 setattr(layer, key, value)
+
+
+def save_weights(model, filepath):
+    with open(filepath, 'wb') as f:
+        pickle.dump(model.state_dict(), f)
+
+def load_weights(model, filepath):
+    with open(filepath, 'rb') as f:
+        state_dict = pickle.load(f)
+    model.load_state_dict(state_dict)
