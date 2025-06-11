@@ -1,4 +1,3 @@
-# dummy_maxpooling.py
 from .tensor import Tensor
 
 class DummyMax:
