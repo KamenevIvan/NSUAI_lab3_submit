@@ -24,3 +24,8 @@ You can pass the next arguments
 | `--model_weights`  | Path to model weights. Has default                          |
 | `--confidence`     | Confidence threshold. Has default                           |
 | `--save_txt`       | If you want to save text results                            |
+
+## Output
+Each input image generates:
+    .jpg file in your output dir with boundig boxes
+    .txt file in your output dir with boundig boxes coordinates and confidence score (if --save_txt on)
