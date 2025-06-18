@@ -1,17 +1,26 @@
-# Лабораторная работа 3. Детекция людей
-## Датасет
-Набор данных, в целом, характеризуется приемлимым качеством. Количество данных примерно 3-4 тысячи картинок. При ручной проверке не обнаружено ложных боксов, хотя сами картинки - это снимки с дрона с большой высоты, поэтому не всегда я мог наверняка сказать, что изображено - человек или нет. Например ![Иллюстрация 1](https://github.com/KamenevIvan/AIcourse/blob/main/Lab3/forREADME/e1.png) ![Иллюстрация 2](https://github.com/KamenevIvan/AIcourse/blob/main/Lab3/forREADME/e1_1.png)
-Здесь видно, что модель находит нечто, очень похожее на людей, но при этом как люди это не помечено. Мне сложно сказать - ошибка ли это разметки, или это реально не люди, но на мой взгляд модель права в данном случае.
+# Detecting people in drone images using YOLOv5s
+The project is aimed at detecting people in drone images. A distinctive feature is the small size of the person in the picture, as the photo is taken from a great height.
 
-## Модель
-Пока что решил использовать простейшую yolov5, если верить описанию, она хорошо подходит для небольшого набора данных, как в нашем случае
+## Requirements
+Firsly you want to download all dependencies:
 
-## Метрики
-Решено было не изобретать велосипед и воспользоваться тем, что возвращает yolo, т.е. Precision, Recall, mAP50 и mAP50-95. Основной ориентир - mAP50
+```
+pip install -r requirements.txt
+```
 
-## Результат
-![Иллюстрация 3](https://github.com/KamenevIvan/AIcourse/blob/main/Lab3/forREADME/results.png)
-Судя по графикам, модель ещё не до конца обучилась, loss всё ещё падает, возможно есть смысл поставить порядка 200-300 эпох.
-На тестовом наборе получен вот такой результат:
-P: 0.681         R: 0.609      mAP50: 0.628   mAP50-95: 0.246
-Показатели не лучшие, но приемлимые, особенно учитывая модель. Также стоит добавить, что я производил сжатие (resize) картинок до 640. В целом понятно, что можно взять, например yolov5m или l и поставить размер, например 1280 чтобы поднять метрики.
+## Detection
+You can pass the path to a specific file or folder to the script, and the result will be one or more images in the output folder.
+
+```
+python detect.py path/to/imageOrFolder.jpg --output_path path/to/OutputFolder --model_weights path/to/castom.pt --save_txt
+```
+
+## Arguments
+You can pass the next arguments
+| Argument           | Description                                                 |
+| ------------------ | ----------------------------------------------------------- |
+| `input_path`       | Path to input file or folder                                |
+| `--output_path`    | Path to output files. Has default                           |
+| `--model_weights`  | Path to model weights. Has default                          |
+| `--confidence`     | Confidence threshold. Has default                           |
+| `--save_txt`       | If you want to save text results                            |
