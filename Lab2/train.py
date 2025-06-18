@@ -8,6 +8,9 @@ from tqdm import tqdm
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import matplotlib.pyplot as plt
+import torch.nn.functional as F
+from scipy.ndimage import distance_transform_edt as edt
+import numpy as np
 
 import csv
 
@@ -67,11 +70,35 @@ def get_model():
 def get_loss_fn():
     jaccard = smp.losses.JaccardLoss(mode='binary')
     bce = smp.losses.SoftBCEWithLogitsLoss()
-    
+    hausdorff = HausdorffLoss()
+
     def _loss(y_pred, y_true):
-        return jaccard(y_pred, y_true) + bce(y_pred, y_true)
+        return jaccard(y_pred, y_true) + bce(y_pred, y_true) + 0.5 * hausdorff(y_pred, y_true)
     
     return _loss
+
+class HausdorffLoss(nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def distance_field(self, mask):
+        mask_np = mask.cpu().numpy()
+        dist = np.zeros_like(mask_np)
+        for b in range(mask_np.shape[0]):
+            dist[b, 0] = edt(mask_np[b, 0] == 0)
+        return torch.tensor(dist, device=mask.device, dtype=torch.float32)
+
+    def forward(self, probs, targets):
+        probs = torch.sigmoid(probs)
+        probs_bin = (probs > 0.5).float()
+        targets_bin = (targets > 0.5).float()
+
+        dt_pred = self.distance_field(probs_bin)
+        dt_true = self.distance_field(targets_bin)
+
+        # Pixel-wise squared distance loss
+        loss = ((probs - targets) ** 2) * (dt_pred ** 2 + dt_true ** 2)
+        return loss.mean()
 
 
 train_transform = A.Compose([
