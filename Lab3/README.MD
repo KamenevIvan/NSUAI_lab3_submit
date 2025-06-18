@@ -2,7 +2,7 @@
 The project is aimed at detecting people in drone images. A distinctive feature is the small size of the person in the picture, as the photo is taken from a great height.
 
 ## Requirements
-Firsly you want to download all dependencies:
+Firstly you want to download all dependencies:
 
 ```
 pip install -r requirements.txt
@@ -12,7 +12,7 @@ pip install -r requirements.txt
 You can pass the path to a specific file or folder to the script, and the result will be one or more images in the output folder.
 
 ```
-python detect.py path/to/imageOrFolder.jpg --output_path path/to/OutputFolder --model_weights path/to/castom.pt --save_txt
+python detect.py path/to/imageOrFolder --output_path path/to/OutputFolder --model_weights path/to/castom.pt --save_txt
 ```
 
 ## Arguments
