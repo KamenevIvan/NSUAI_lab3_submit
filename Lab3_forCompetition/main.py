@@ -2,12 +2,18 @@ import argparse
 import cv2
 import numpy as np
 import os
+import sys
 from pathlib import Path
 import torch
+import pathlib
 from yolov5.detect import run
 
 
 def main():
+
+    if sys.platform != "win32":
+        pathlib.WindowsPath = pathlib.PosixPath
+
     parser = argparse.ArgumentParser(description='Predict bounding boxes on the image.')
     parser.add_argument('input_path', type=str, help='Path to input file or folder.')
     parser.add_argument('--output_path', type=str, default='./output', help='Path to output files.')

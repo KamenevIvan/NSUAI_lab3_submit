@@ -8,11 +8,16 @@ Firstly you want to download all dependencies:
 pip install -r requirements.txt
 ```
 
+if for some reazon you don't have it, then you should install:
+```
+sudo apt install libgl1
+```
+
 ## Detection
 You can pass the path to a specific file or folder to the script, and the result will be one or more images in the output folder.
 
 ```
-python detect.py path/to/imageOrFolder --output_path path/to/OutputFolder --model_weights path/to/castom.pt --save_txt
+python main.py path/to/imageOrFolder --output_path path/to/OutputFolder --model_weights path/to/castom.pt --save_txt
 ```
 
 ## Arguments
